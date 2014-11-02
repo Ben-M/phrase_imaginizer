@@ -27,20 +27,19 @@ func main() {
       go getImage(word, channel)
     }
 
-    // output := ""
-    // for _, channel := range channels {
-    //   image := <- channel
+    var image_strip image.Image
+    for _, channel := range channels {
+      image := <- channel
 
-    //   #we are getting images
-    // }
-
-    left_image := <- channels[0]
-    right_image := <- channels[1]
-
-    combined_image := combineImages(left_image, right_image)
+      if image_strip == nil {
+        image_strip = image
+      } else {
+        image_strip = combineImages(image_strip, image)
+      }
+    }
 
     out := new(bytes.Buffer)
-    png.Encode(out, combined_image)
+    png.Encode(out, image_strip)
     return 200, string(out.Bytes())
   })
   
@@ -89,14 +88,15 @@ func downloadImage(urls []string) image.Image{
 
 func combineImages(left_image image.Image, right_image image.Image) image.Image {
   
+  separator_width := 10
   left_image_width := getWidth(left_image)
   right_image_width := getWidth(right_image)
-  total_width := left_image_width + right_image_width
+  total_width := left_image_width + separator_width + right_image_width
 
   canvas := image.NewRGBA(image.Rect(0, 0, total_width, 150))
 
   drawImageAtPosition(canvas, left_image, image.Point{0,0})
-  drawImageAtPosition(canvas, right_image, image.Point{left_image_width,0})
+  drawImageAtPosition(canvas, right_image, image.Point{left_image_width + separator_width,0})
   
   return canvas
 }
