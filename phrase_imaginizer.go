@@ -9,11 +9,15 @@ import (
   "image"
   "bytes"
   "image/png"
+  "image/jpeg"
   "image/draw"
   "fmt"
+  "os"
 )
 
 func main() {
+
+  image.RegisterFormat("jpg", "jp?g", jpeg.Decode, jpeg.DecodeConfig) 
   m := martini.Classic()
 
   // http://localhost:3000/hello/myname
@@ -48,8 +52,7 @@ func main() {
 }
 
 func getImage(word string, c chan image.Image) {
-  many_urls := getUrls(word)
-  urls := many_urls[1:10]
+  urls := getUrls(word)
   fmt.Println(urls) 
   image := downloadImage(urls)
   c <- image
@@ -83,10 +86,18 @@ func downloadImage(urls []string) image.Image{
   
   client := &http.Client{}
   resp, _ := client.Do(req)
-  defer resp.Body.Close()
+  
+  if(resp.StatusCode==200) {
+  
+    defer resp.Body.Close()
 
-  img, _, _:= image.Decode(resp.Body)
-  return img
+    img, _, _:= image.Decode(resp.Body)
+    return img
+  } else {
+    file, _ := os.Open("unknown.jpg")
+    unknown, _, _ := image.Decode(file)
+    return unknown
+  }
 }
 
 func combineImages(left_image image.Image, right_image image.Image) image.Image {
