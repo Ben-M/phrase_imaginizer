@@ -10,6 +10,7 @@ import (
   "bytes"
   "image/png"
   "image/draw"
+  "fmt"
 )
 
 func main() {
@@ -47,7 +48,9 @@ func main() {
 }
 
 func getImage(word string, c chan image.Image) {
-  urls := getUrls(word)
+  many_urls := getUrls(word)
+  urls := many_urls[1:10]
+  fmt.Println(urls) 
   image := downloadImage(urls)
   c <- image
 }
