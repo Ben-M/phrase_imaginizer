@@ -10,6 +10,7 @@ import (
   "bytes"
   "image/png"
   "os"
+  "fmt"
 )
 
 func main() {
@@ -33,6 +34,7 @@ func main() {
 
     //   #we are getting images
     // }
+
     image := <- channels[0]
 
     out, _ := os.Create("test.png")
@@ -59,12 +61,22 @@ func getUrls(word string) []string {
   return urls
 }
 
+type ImageRequest struct {
+    Urls []string
+    Size uint8
+}
+
 func downloadImage(urls []string) image.Image{  
-
-
   url := "http://localhost:3002/get_image.json"
-  var jsonStr = []byte(`{"Urls": ["https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTX7WKQj5RLr74tZmOEif9ERnS8-KfWMXNjkTglTGQExP2_feXRTWTb_G4Z","https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuBJEf-pAglK7apvgc9yTlruLohJewzuoAsSWBKi6drkE0TDuG","https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-IVAu9tVKf54K-rZe5SwlhHUzepCX56BdIzUMDUqrT7BKXNYZFw","https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSxzgFUNPOZpJEVhWGMclKiopzaJAVU9Hqs6ceRTh0f0cZOYqv5wg"], "Height": 150}`)
-    
+
+  request := ImageRequest{
+    Urls: urls,
+    Size: 150,
+  }
+
+  jsonStr, _ := json.Marshal(request)
+  fmt.Println(string(jsonStr))
+
   req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
   
   client := &http.Client{}
